@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>cr.dev.monkey's MP3 & MP4 Player</title>
+        <!-- Verknüpfung zu separater CSS-Design-Datei-->
+         <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>cr.dev.monkey's MP3 & MP4 Player</h1>
+        <p>Designed & developed with ParrotOS & VS Codium by cr.dev.monkey...</p>
+
+        <!-- Video Sektion -->
+<div class="player-box">
+    <h3>🎬 Video Player (MP4)</h3>
+    <!-- Ein Datei-Auswahlfeld für Videos -->
+    <input type="file" id="videoFilePicker" accept="video/mp4">
+    <video id="myVideo" controls></video>
+    <button onclick="castVideo()">📺 Auf TV spiegeln (Cast/AirPlay)</button>
+</div>
+
+<!-- MP3 Sektion mit Equalizer -->
+    <div class="player-box">
+        <h3>🎵 MP3 Player & Equalizer</h3>
+        <input type="file" id="audioFilePicker" accept="audio/mp3" multiple>
+        
+        <!-- GENAU EIN EINZIGER AUDIO-PLAYER -->
+        <audio id="myAudio" controls preload="auto"></audio>
+        
+        <ul id="audioPlaylistUI"></ul>
+
+        <div>
+            <label>Bass (Low): <input type="range" id="bassRange" min="-20" max="20" value="0"></label><br>
+            <label>Mitten (Mid): <input type="range" id="midRange" min="-20" max="20" value="0"></label><br>
+            <label>Höhen (High): <input type="range" id="highRange" min="-20" max="20" value="0"></label>
+        </div>
+    </div>
+
+          <!-- Playlist Speicher Sektion -->
+           <div class="player-box">
+            <h3>💾 Playlist Manager (Local Storage)</h3>
+            <input type="text" id="trackinput" placeholder="Track-Name eingeben...">
+            <button onclick="saveTrack ()">Zur Playlist hinzufügen</button>
+            <ul id="playlistContainer"></ul>
+           </div>
+
+                <div class="player-box" style="text-align: center;">
+    <a href="impressum.html">
+        <button>📜 Zum Impressum & Danksagung</button>
+    </a>
+</div>
+
+           <script src="app.js"></script>
+    </body>
+</html>
