@@ -1,0 +1,40 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build iOS App and generate IPA
+    runs-on: macos-latest
+
+    steps:
+      - name: Code aus Repository laden
+        uses: actions/checkout@v4
+
+      - name: Xcode Version auswählen (optional)
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Projekt archivieren und IPA exportieren (Unsigned / Debug)
+        run: |
+            # Falls du ein Workspace hast, nutze -workspace anstelle von -project
+            # Ersetze "DeinProjektName" mit dem echten Namen deines Xcode-Projekts (.xcodeproj oder .xcworkspace)
+            xcodebuild -project DeinProjektName.xcodeproj \
+                       -scheme DeinProjektName \
+                       -sdk iphoneos \
+                       -configuration Release \
+                       archive -archivePath build/DeinProjektName.xcarchive
+            
+            # Export in ein IPA (für lokale unsigned Tests oder Entwicklung)
+            xcodebuild -exportArchive \
+                       -archivePath build/DeinProjektName.xcarchive \
+                       -exportPath build/ipa \
+                       -exportOptionsPlist ExportOptions.plist
+        continue-on-error: true
+
+      - name: IPA als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-file
+          path: build/ipa/*.ipa
