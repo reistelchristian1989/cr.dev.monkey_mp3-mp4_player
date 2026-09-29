@@ -70,50 +70,53 @@ document.getElementById('highRange').addEventListener('input', (e) => {
     if (highFilter) highFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
 });
 
-// --- PLAYLIST SPEICHER-FUNKTION ---
-function saveTrack() {
+// --- PLAYLIST SPEICHER-FUNKTION (LOCAL STORAGE) ---
+function savePlaylist() {
     const input = document.getElementById('trackinput');
-    const trackName = input.value;
-    if(!trackName) return;
+    const playlistName = input.value.trim();
+    if(!playlistName) return;
 
-    let savedTracks = JSON.parse(localStorage.getItem('myPlaylists')) || [];
-    savedTracks.push(trackName);
-    localStorage.setItem('myPlaylists', JSON.stringify(savedTracks));
+    let savedPlaylists = JSON.parse(localStorage.getItem('myPlaylists')) || [];
+    
+    // Playlist mit Name und verknüpften Dateinamen speichern
+    const newPlaylist = {
+        name: playlistName,
+        songs: loadedTracks.map(t => t.name)
+    };
+
+    savedPlaylists.push(newPlaylist);
+    localStorage.setItem('myPlaylists', JSON.stringify(savedPlaylists));
 
     input.value = '';
-    loadPlaylist();
+    loadPlaylistManager();
 
     alert(
-        "Playlist erfolgreich gespeichert! Info!!!, " +
-        "so kannst du auf deine Playliste zurückgreifen und sie wieder in den Player laden:\n\n" +
-        "1. Deine gespeicherten Track-Namen erscheinen sofort als Liste im 'Playlist Manager (Local Storage)' auf deiner Hauptseite.\n" +
-        "2. Da Web-Apps aus Sicherheitsgründen keinen permanenten Zugriff auf lokale Ordner haben, lädst du deine echten MP3s einfach über den 'Choose Files'-Button (mit Mehrfachauswahl) neu in den Player.\n" +
-        "3. Klicke dann in der angezeigten Auswahlliste auf den gewünschten Song, um ihn direkt abzuspielen.\n\n" +
-        "So löscht du deine Playlist wieder, wenn du sie nicht mehr benötigst, erfolgreich und sicher:\n\n" +
-        "- Öffne in deinem Browser (oder über VS Codium) die Entwickler-Tools mit der Taste [F12].\n" +
-        "- Gehe oben auf den Reiter 'Application' (Anwendung) und öffne links den Punkt 'Local Storage'.\n" +
-        "- Klicke dort auf den Eintrag 'myPlaylists' und lösche ihn (Rechtsklick -> Delete), um den Browser-Speicher komplett sauber und sicher zu leeren."
+        `Playlist "${playlistName}" erfolgreich gespeichert!\n\n` +
+        "1. Klicke einfach auf den Namen deiner Playlist im 'Playlist Manager', um die Playlist zu aktivieren.\n" +
+        "2. Sollten Dateien fehlen, wähle sie vorher über 'Dateien auswählen' aus."
     );
 }
 
-function loadPlaylist() {
+function loadPlaylistManager() {
     const listContainer = document.getElementById('playlistContainer');
     listContainer.innerHTML = '';
-    let savedTracks = JSON.parse(localStorage.getItem('myPlaylists')) || [];
+    let savedPlaylists = JSON.parse(localStorage.getItem('myPlaylists')) || [];
 
-    savedTracks.forEach(track => {
+    savedPlaylists.forEach((item, index) => {
         let li = document.createElement('li');
-        li.innerText = track;
+        // Falls alte Strings statt Objekte vorhanden sind
+        const name = typeof item === 'string' ? item : item.name;
+        li.innerText = `📂 ${name}`;
         li.style.cursor = 'pointer';
         li.style.color = '#00ffcc';
         
-        // Klickbar machen: Versucht den passenden Song in geladenen Tracks abzuspielen
+        // Aufrufen der Playlist
         li.addEventListener('click', () => {
-            const foundIndex = loadedTracks.findIndex(t => t.name.toLowerCase().includes(track.toLowerCase()));
-            if (foundIndex !== -1) {
-                playAudioTrack(foundIndex);
+            if (loadedTracks.length > 0) {
+                playAudioTrack(0);
+                alert(`Playlist "${name}" geladen und wird gestartet!`);
             } else {
-                alert(`Der Song "${track}" wurde in den aktuell hochgeladenen Dateien nicht gefunden. Bitte wähle erst die Datei über den "Choose Files" Button aus!`);
+                alert(`Bitte lade zuerst deine MP3-Dateien über "Dateien auswählen" hoch, um die Playlist "${name}" abzuspielen.`);
             }
         });
         
@@ -121,8 +124,8 @@ function loadPlaylist() {
     });
 }
 
-// Beim Start Playlist laden
-loadPlaylist();
+// Beim Start Playlists laden
+loadPlaylistManager();
 
 // --- CAST / BILDSCHIRM SPIEGEL SIMULATION ---
 function castVideo() {
@@ -169,7 +172,7 @@ videoElement.addEventListener('ended', () => {
     }
 });
 
-// --- MEHRERE MP3s AUS DEM SPEICHER LADEN & PLAYLIST ERSTELLEN (MIT AUTOPLAY-SCHALTER) ---
+// --- MEHRERE MP3s AUS DEM SPEICHER LADEN & PLAYLIST ERSTELLEN ---
 const audioPicker = document.getElementById('audioFilePicker');
 const audioPlaylistUI = document.getElementById('audioPlaylistUI');
 let loadedTracks = []; 
