@@ -93,8 +93,20 @@ function savePlaylist() {
     alert(
         `Playlist "${playlistName}" erfolgreich gespeichert!\n\n` +
         "1. Klicke einfach auf den Namen deiner Playlist im 'Playlist Manager', um die Playlist zu aktivieren.\n" +
-        "2. Sollten Dateien fehlen, wähle sie vorher über 'Dateien auswählen' aus."
+        "2. Über das Papierkorb-Symbol ganz rechts kannst du die Playlist jederzeit wieder löschen.\n" +
+        "3. Sollten Dateien fehlen, wähle sie vorher über 'Dateien auswählen' aus."
     );
+}
+
+function deletePlaylist(index) {
+    let savedPlaylists = JSON.parse(localStorage.getItem('myPlaylists')) || [];
+    const name = typeof savedPlaylists[index] === 'string' ? savedPlaylists[index] : savedPlaylists[index].name;
+
+    if (confirm(`Möchtest du die Playlist "${name}" wirklich löschen?`)) {
+        savedPlaylists.splice(index, 1);
+        localStorage.setItem('myPlaylists', JSON.stringify(savedPlaylists));
+        loadPlaylistManager();
+    }
 }
 
 function loadPlaylistManager() {
@@ -104,14 +116,21 @@ function loadPlaylistManager() {
 
     savedPlaylists.forEach((item, index) => {
         let li = document.createElement('li');
-        // Falls alte Strings statt Objekte vorhanden sind
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+        li.style.marginBottom = '5px';
+
         const name = typeof item === 'string' ? item : item.name;
-        li.innerText = `📂 ${name}`;
-        li.style.cursor = 'pointer';
-        li.style.color = '#00ffcc';
+
+        // Text für die Playlist
+        let nameSpan = document.createElement('span');
+        nameSpan.innerText = `📂 ${name}`;
+        nameSpan.style.cursor = 'pointer';
+        nameSpan.style.color = '#00ffcc';
         
         // Aufrufen der Playlist
-        li.addEventListener('click', () => {
+        nameSpan.addEventListener('click', () => {
             if (loadedTracks.length > 0) {
                 playAudioTrack(0);
                 alert(`Playlist "${name}" geladen und wird gestartet!`);
@@ -119,7 +138,23 @@ function loadPlaylistManager() {
                 alert(`Bitte lade zuerst deine MP3-Dateien über "Dateien auswählen" hoch, um die Playlist "${name}" abzuspielen.`);
             }
         });
-        
+
+        // Papierkorb Button ganz rechts
+        let deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.title = 'Diese Playlist löschen';
+        deleteBtn.style.padding = '2px 8px';
+        deleteBtn.style.marginLeft = '10px';
+        deleteBtn.style.borderRadius = '12px';
+        deleteBtn.style.fontSize = '12px';
+
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deletePlaylist(index);
+        });
+
+        li.appendChild(nameSpan);
+        li.appendChild(deleteBtn);
         listContainer.appendChild(li);
     });
 }
