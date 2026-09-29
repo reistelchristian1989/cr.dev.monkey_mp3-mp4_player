@@ -4,6 +4,31 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let sourceNode, bassFilter, midFilter, highFilter;
 let isAudioInitialized = false;
 
+// Autoplay Steuerung
+let isAudioAutoplay = true;
+let isVideoAutoplay = true;
+
+function toggleAudioAutoplay() {
+    isAudioAutoplay = !isAudioAutoplay;
+    const btn = document.getElementById('toggleAudioAutoplayBtn');
+    btn.innerText = `🔄 Audio Autoplay: ${isAudioAutoplay ? 'AN' : 'AUS'}`;
+}
+
+function toggleVideoAutoplay() {
+    isVideoAutoplay = !isVideoAutoplay;
+    const btn = document.getElementById('toggleVideoAutoplayBtn');
+    btn.innerText = `🔄 Video Autoplay: ${isVideoAutoplay ? 'AN' : 'AUS'}`;
+}
+
+// Impressum Modal ohne Musik-Stopp
+function openImpressumModal() {
+    document.getElementById('impressumModal').style.display = 'block';
+}
+
+function closeImpressumModal() {
+    document.getElementById('impressumModal').style.display = 'none';
+}
+
 audioElement.addEventListener('play', () => {
     if (!isAudioInitialized) {
         if (audioCtx.state === 'suspended') {
@@ -45,7 +70,7 @@ document.getElementById('highRange').addEventListener('input', (e) => {
     if (highFilter) highFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
 });
 
-// --- PLAYLIST SPEICHER-FUNKTION (Mit erweiterter Anleitung & Erfolgsmeldung) ---
+// --- PLAYLIST SPEICHER-FUNKTION ---
 function saveTrack() {
     const input = document.getElementById('trackinput');
     const trackName = input.value;
@@ -58,7 +83,6 @@ function saveTrack() {
     input.value = '';
     loadPlaylist();
 
-    // Die erweiterte Info-Meldung exakt nach deiner Vorlage
     alert(
         "Playlist erfolgreich gespeichert! Info!!!, " +
         "so kannst du auf deine Playliste zurückgreifen und sie wieder in den Player laden:\n\n" +
@@ -80,6 +104,19 @@ function loadPlaylist() {
     savedTracks.forEach(track => {
         let li = document.createElement('li');
         li.innerText = track;
+        li.style.cursor = 'pointer';
+        li.style.color = '#00ffcc';
+        
+        // Klickbar machen: Versucht den passenden Song in geladenen Tracks abzuspielen
+        li.addEventListener('click', () => {
+            const foundIndex = loadedTracks.findIndex(t => t.name.toLowerCase().includes(track.toLowerCase()));
+            if (foundIndex !== -1) {
+                playAudioTrack(foundIndex);
+            } else {
+                alert(`Der Song "${track}" wurde in den aktuell hochgeladenen Dateien nicht gefunden. Bitte wähle erst die Datei über den "Choose Files" Button aus!`);
+            }
+        });
+        
         listContainer.appendChild(li);
     });
 }
@@ -100,7 +137,7 @@ function castVideo() {
     }
 }
 
-// --- VIDEO AUS DEM INTERNEN SPEICHER LADEN (MIT AUTOPLAY-PLAYLIST) ---
+// --- VIDEO AUS DEM INTERNEN SPEICHER LADEN (MIT AUTOPLAY-SCHALTER) ---
 const videoPicker = document.getElementById('videoFilePicker');
 const videoElement = document.getElementById('myVideo');
 let loadedVideos = [];
@@ -125,14 +162,14 @@ function playVideoTrack(index) {
     }
 }
 
-// Autoplay: Nächstes Video abspielen, wenn das aktuelle zu Ende ist
+// Autoplay: Nur abspielen wenn isVideoAutoplay === true
 videoElement.addEventListener('ended', () => {
-    if (currentVideoIndex + 1 < loadedVideos.length) {
+    if (isVideoAutoplay && currentVideoIndex + 1 < loadedVideos.length) {
         playVideoTrack(currentVideoIndex + 1);
     }
 });
 
-// --- MEHRERE MP3s AUS DEM SPEICHER LADEN & PLAYLIST ERSTELLEN (MIT AUTOPLAY) ---
+// --- MEHRERE MP3s AUS DEM SPEICHER LADEN & PLAYLIST ERSTELLEN (MIT AUTOPLAY-SCHALTER) ---
 const audioPicker = document.getElementById('audioFilePicker');
 const audioPlaylistUI = document.getElementById('audioPlaylistUI');
 let loadedTracks = []; 
@@ -154,7 +191,7 @@ function playAudioTrack(index) {
         audioElement.src = URL.createObjectURL(loadedTracks[index]);
         audioElement.load();
         audioElement.play().catch(err => console.log("Wiedergabe bereit."));
-        renderAudioPlaylist(); // Zum Hervorheben des aktuellen Tracks
+        renderAudioPlaylist();
     }
 }
 
@@ -166,9 +203,8 @@ function renderAudioPlaylist() {
         li.innerText = track.name; 
         li.style.cursor = 'pointer';
         
-        // Aktuell spielenden Track optisch markieren
         if (index === currentAudioIndex && audioElement.src) {
-            li.style.color = '#ff0000'; // Rot für den aktiven Track
+            li.style.color = '#ff0000';
             li.style.fontWeight = 'bold';
         } else {
             li.style.color = '#00ffcc';
@@ -182,9 +218,9 @@ function renderAudioPlaylist() {
     });
 }
 
-// Autoplay: Nächsten MP3-Track abspielen, wenn der aktuelle zu Ende ist
+// Autoplay: Nur abspielen wenn isAudioAutoplay === true
 audioElement.addEventListener('ended', () => {
-    if (currentAudioIndex + 1 < loadedTracks.length) {
+    if (isAudioAutoplay && currentAudioIndex + 1 < loadedTracks.length) {
         playAudioTrack(currentAudioIndex + 1);
     }
 });
