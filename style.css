@@ -29,7 +29,7 @@ video, audio {
 button {
     background: #00ffcc;
     color: #121212;
-    border: 24px;
+    border: none;
     border-radius: 24px;
     padding: 8px 12px;
     font-weight: bold;
@@ -38,6 +38,43 @@ button {
 }
 
 button:hover {
+    background: #ff0000;
+    color: #fff;
+}
+
+/* --- DATEI-AUSWAHL BUTTONS IM SELBEN STIL --- */
+input[type="file"]::file-selector-button {
+    background: #00ffcc;
+    color: #121212;
+    border: none;
+    border-radius: 24px;
+    padding: 8px 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 10px;
+    font-family: monospace;
+    transition: background 0.2s;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: #ff0000;
+    color: #fff;
+}
+
+/* Für ältere WebKit Browser / Kompatibilität */
+input[type="file"]::-webkit-file-upload-button {
+    background: #00ffcc;
+    color: #121212;
+    border: none;
+    border-radius: 24px;
+    padding: 8px 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 10px;
+    font-family: monospace;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
     background: #ff0000;
     color: #fff;
 }
