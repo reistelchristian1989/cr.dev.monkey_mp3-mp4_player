@@ -42,6 +42,12 @@ button:hover {
     color: #fff;
 }
 
+/* --- PLAYLIST CONTAINER LISTE --- */
+#playlistContainer {
+    list-style: none;
+    padding-left: 0;
+}
+
 /* --- DATEI-AUSWAHL BUTTONS IM SELBEN STIL --- */
 input[type="file"]::file-selector-button {
     background: #00ffcc;
