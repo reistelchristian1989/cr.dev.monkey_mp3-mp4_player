@@ -100,22 +100,43 @@ function castVideo() {
     }
 }
 
-// --- VIDEO AUS DEM INTERNEN SPEICHER LADEN ---
+// --- VIDEO AUS DEM INTERNEN SPEICHER LADEN (MIT AUTOPLAY-PLAYLIST) ---
 const videoPicker = document.getElementById('videoFilePicker');
 const videoElement = document.getElementById('myVideo');
+let loadedVideos = [];
+let currentVideoIndex = 0;
 
 videoPicker.addEventListener('change', (event) => {
-    const file = event.target.files[0]; 
-    if (file) {
-        videoElement.src = URL.createObjectURL(file);
-        videoElement.load();
+    const files = event.target.files;
+    loadedVideos = Array.from(files);
+    currentVideoIndex = 0;
+
+    if (loadedVideos.length > 0) {
+        playVideoTrack(currentVideoIndex);
     }
 });
 
-// --- MEHRERE MP3s AUS DEM SPEICHER LADEN & PLAYLIST ERSTELLEN ---
+function playVideoTrack(index) {
+    if (index >= 0 && index < loadedVideos.length) {
+        currentVideoIndex = index;
+        videoElement.src = URL.createObjectURL(loadedVideos[index]);
+        videoElement.load();
+        videoElement.play().catch(err => console.log("Video-Wiedergabe bereit."));
+    }
+}
+
+// Autoplay: Nächstes Video abspielen, wenn das aktuelle zu Ende ist
+videoElement.addEventListener('ended', () => {
+    if (currentVideoIndex + 1 < loadedVideos.length) {
+        playVideoTrack(currentVideoIndex + 1);
+    }
+});
+
+// --- MEHRERE MP3s AUS DEM SPEICHER LADEN & PLAYLIST ERSTELLEN (MIT AUTOPLAY) ---
 const audioPicker = document.getElementById('audioFilePicker');
 const audioPlaylistUI = document.getElementById('audioPlaylistUI');
 let loadedTracks = []; 
+let currentAudioIndex = 0;
 
 audioPicker.addEventListener('change', (event) => {
     const files = event.target.files; 
@@ -127,23 +148,43 @@ audioPicker.addEventListener('change', (event) => {
     renderAudioPlaylist();
 });
 
+function playAudioTrack(index) {
+    if (index >= 0 && index < loadedTracks.length) {
+        currentAudioIndex = index;
+        audioElement.src = URL.createObjectURL(loadedTracks[index]);
+        audioElement.load();
+        audioElement.play().catch(err => console.log("Wiedergabe bereit."));
+        renderAudioPlaylist(); // Zum Hervorheben des aktuellen Tracks
+    }
+}
+
 function renderAudioPlaylist() {
     audioPlaylistUI.innerHTML = ''; 
     
-    loadedTracks.forEach((track) => {
+    loadedTracks.forEach((track, index) => {
         let li = document.createElement('li');
         li.innerText = track.name; 
         li.style.cursor = 'pointer';
-        li.style.color = '#00ffcc';
+        
+        // Aktuell spielenden Track optisch markieren
+        if (index === currentAudioIndex && audioElement.src) {
+            li.style.color = '#ff0000'; // Rot für den aktiven Track
+            li.style.fontWeight = 'bold';
+        } else {
+            li.style.color = '#00ffcc';
+        }
         
         li.addEventListener('click', () => {
-            audioElement.src = URL.createObjectURL(track);
-            audioElement.load();
-            audioElement.play().catch(err => {
-                console.log("Wiedergabe bereit.");
-            });
+            playAudioTrack(index);
         });
         
         audioPlaylistUI.appendChild(li);
     });
 }
+
+// Autoplay: Nächsten MP3-Track abspielen, wenn der aktuelle zu Ende ist
+audioElement.addEventListener('ended', () => {
+    if (currentAudioIndex + 1 < loadedTracks.length) {
+        playAudioTrack(currentAudioIndex + 1);
+    }
+});
