@@ -14,8 +14,8 @@
         <!-- Video Sektion -->
 <div class="player-box">
     <h3>🎬 Video Player (MP4)</h3>
-    <!-- Ein Datei-Auswahlfeld für Videos -->
-    <input type="file" id="videoFilePicker" accept="video/mp4">
+    <!-- Ein Datei-Auswahlfeld für Videos (mit Mehrfachauswahl) -->
+    <input type="file" id="videoFilePicker" accept="video/mp4" multiple>
     <video id="myVideo" controls></video>
     <button onclick="castVideo()">📺 Auf TV spiegeln (Cast/AirPlay)</button>
 </div>
@@ -38,12 +38,12 @@
     </div>
 
           <!-- Playlist Speicher Sektion -->
-           <div class="player-box">
+            <div class="player-box">
             <h3>💾 Playlist Manager (Local Storage)</h3>
             <input type="text" id="trackinput" placeholder="Hier Namen der Playlist eintragen...">
             <button onclick="saveTrack ()">Zur Playlist hinzufügen</button>
             <ul id="playlistContainer"></ul>
-           </div>
+            </div>
 
                 <div class="player-box" style="text-align: center;">
     <a href="impressum.html">
