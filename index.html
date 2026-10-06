@@ -16,7 +16,20 @@
     <h3>🎬 Video Player (MP4)</h3>
     <!-- Ein Datei-Auswahlfeld für Videos -->
     <input type="file" id="videoFilePicker" accept="video/mp4" multiple>
+    
+    <!-- Video Playlist UI -->
+    <ul id="videoPlaylistUI"></ul>
+
     <video id="myVideo" controls></video>
+    
+    <!-- Vor-/Zurückspulen & Skip Buttons für Video -->
+    <div style="margin: 10px 0;">
+        <button onclick="skipVideo(-1)">⏮️ Skip Zurück</button>
+        <button onclick="seekVideo(-10)">⏪ -10s</button>
+        <button onclick="seekVideo(10)">⏩ +10s</button>
+        <button onclick="skipVideo(1)">⏭️ Skip Vor</button>
+    </div>
+
     <button id="toggleVideoAutoplayBtn" onclick="toggleVideoAutoplay()">🔄 Video Autoplay: AN</button>
     <button onclick="castVideo()">📺 Auf TV spiegeln (Cast/AirPlay)</button>
 </div>
@@ -28,6 +41,15 @@
         
         <!-- GENAU EIN EINZIGER AUDIO-PLAYER -->
         <audio id="myAudio" controls preload="auto"></audio>
+        
+        <!-- Vor-/Zurückspulen & Skip Buttons für Audio -->
+        <div style="margin: 10px 0;">
+            <button onclick="skipAudio(-1)">⏮️ Skip Zurück</button>
+            <button onclick="seekAudio(-10)">⏪ -10s</button>
+            <button onclick="seekAudio(10)">⏩ +10s</button>
+            <button onclick="skipAudio(1)">⏭️ Skip Vor</button>
+        </div>
+
         <button id="toggleAudioAutoplayBtn" onclick="toggleAudioAutoplay()">🔄 Audio Autoplay: AN</button>
         
         <ul id="audioPlaylistUI"></ul>
