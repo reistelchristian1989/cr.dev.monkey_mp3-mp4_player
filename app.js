@@ -70,6 +70,35 @@ document.getElementById('highRange').addEventListener('input', (e) => {
     if (highFilter) highFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
 });
 
+// --- SPUL- UND SKIP-FUNKTIONEN FÜR AUDIO ---
+function seekAudio(seconds) {
+    if (audioElement) {
+        audioElement.currentTime += seconds;
+    }
+}
+
+function skipAudio(direction) {
+    let newIndex = currentAudioIndex + direction;
+    if (newIndex >= 0 && newIndex < loadedTracks.length) {
+        playAudioTrack(newIndex);
+    }
+}
+
+// --- SPUL- UND SKIP-FUNKTIONEN FÜR VIDEO ---
+function seekVideo(seconds) {
+    const videoElement = document.getElementById('myVideo');
+    if (videoElement) {
+        videoElement.currentTime += seconds;
+    }
+}
+
+function skipVideo(direction) {
+    let newIndex = currentVideoIndex + direction;
+    if (newIndex >= 0 && newIndex < loadedVideos.length) {
+        playVideoTrack(newIndex);
+    }
+}
+
 // --- PLAYLIST SPEICHER-FUNKTION (LOCAL STORAGE) ---
 function savePlaylist() {
     const input = document.getElementById('trackinput');
@@ -78,7 +107,6 @@ function savePlaylist() {
 
     let savedPlaylists = JSON.parse(localStorage.getItem('myPlaylists')) || [];
     
-    // Playlist mit Name und verknüpften Dateinamen speichern
     const newPlaylist = {
         name: playlistName,
         songs: loadedTracks.map(t => t.name)
@@ -123,13 +151,11 @@ function loadPlaylistManager() {
 
         const name = typeof item === 'string' ? item : item.name;
 
-        // Text für die Playlist
         let nameSpan = document.createElement('span');
         nameSpan.innerText = `📂 ${name}`;
         nameSpan.style.cursor = 'pointer';
         nameSpan.style.color = '#00ffcc';
         
-        // Aufrufen der Playlist
         nameSpan.addEventListener('click', () => {
             if (loadedTracks.length > 0) {
                 playAudioTrack(0);
@@ -139,7 +165,6 @@ function loadPlaylistManager() {
             }
         });
 
-        // Papierkorb Button ganz rechts
         let deleteBtn = document.createElement('button');
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.title = 'Diese Playlist löschen';
@@ -159,7 +184,6 @@ function loadPlaylistManager() {
     });
 }
 
-// Beim Start Playlists laden
 loadPlaylistManager();
 
 // --- CAST / BILDSCHIRM SPIEGEL SIMULATION ---
@@ -175,9 +199,10 @@ function castVideo() {
     }
 }
 
-// --- VIDEO AUS DEM INTERNEN SPEICHER LADEN (MIT AUTOPLAY-SCHALTER) ---
+// --- VIDEO AUS DEM INTERNEN SPEICHER LADEN (MIT PLAYLIST UI & AUTOPLAY) ---
 const videoPicker = document.getElementById('videoFilePicker');
 const videoElement = document.getElementById('myVideo');
+const videoPlaylistUI = document.getElementById('videoPlaylistUI');
 let loadedVideos = [];
 let currentVideoIndex = 0;
 
@@ -186,6 +211,7 @@ videoPicker.addEventListener('change', (event) => {
     loadedVideos = Array.from(files);
     currentVideoIndex = 0;
 
+    renderVideoPlaylist();
     if (loadedVideos.length > 0) {
         playVideoTrack(currentVideoIndex);
     }
@@ -197,10 +223,34 @@ function playVideoTrack(index) {
         videoElement.src = URL.createObjectURL(loadedVideos[index]);
         videoElement.load();
         videoElement.play().catch(err => console.log("Video-Wiedergabe bereit."));
+        renderVideoPlaylist();
     }
 }
 
-// Autoplay: Nur abspielen wenn isVideoAutoplay === true
+function renderVideoPlaylist() {
+    if (!videoPlaylistUI) return;
+    videoPlaylistUI.innerHTML = '';
+    
+    loadedVideos.forEach((video, index) => {
+        let li = document.createElement('li');
+        li.innerText = video.name;
+        li.style.cursor = 'pointer';
+        
+        if (index === currentVideoIndex && videoElement.src) {
+            li.style.color = '#ff0000';
+            li.style.fontWeight = 'bold';
+        } else {
+            li.style.color = '#00ffcc';
+        }
+        
+        li.addEventListener('click', () => {
+            playVideoTrack(index);
+        });
+        
+        videoPlaylistUI.appendChild(li);
+    });
+}
+
 videoElement.addEventListener('ended', () => {
     if (isVideoAutoplay && currentVideoIndex + 1 < loadedVideos.length) {
         playVideoTrack(currentVideoIndex + 1);
@@ -256,7 +306,6 @@ function renderAudioPlaylist() {
     });
 }
 
-// Autoplay: Nur abspielen wenn isAudioAutoplay === true
 audioElement.addEventListener('ended', () => {
     if (isAudioAutoplay && currentAudioIndex + 1 < loadedTracks.length) {
         playAudioTrack(currentAudioIndex + 1);
