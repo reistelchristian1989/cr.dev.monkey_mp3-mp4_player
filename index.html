@@ -1,100 +1,59 @@
 <!DOCTYPE html>
 <html lang="de">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>cr.dev.monkey's Chimpanzee-Player</title>
-        <!-- Verknüpfung zu separater CSS-Design-Datei-->
-         <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1>cr.dev.monkey's Chimpanzee-Player</h1>
-        <p>Designed & developed with ParrotOS & VS Codium by cr.dev.monkey...</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cr.dev.monkey's MP3 & MP4 Player</title>
+    <!-- Verknüpfung zu separater CSS-Design-Datei -->
+    <link rel="stylesheet" href="style.css">
+    <!-- HLS.js Bibliothek für m3u8 Streaming -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <h1>cr.dev.monkey's MP3 & MP4 Player</h1>
+    <p>Designed & developed with ParrotOS & VS Codium by cr.dev.monkey...</p>
 
-        <!-- Video Sektion -->
-<div class="player-box">
-    <h3>🎬 Video Player (MP4)</h3>
-    <!-- Ein Datei-Auswahlfeld für Videos -->
-    <input type="file" id="videoFilePicker" accept="video/mp4" multiple>
-    
-    <!-- Video Playlist UI -->
-    <ul id="videoPlaylistUI"></ul>
-
-    <video id="myVideo" controls></video>
-    
-    <!-- Vor-/Zurückspulen & Skip Buttons für Video -->
-    <div style="margin: 10px 0;">
-        <button onclick="skipVideo(-1)">⏮️ Skip Zurück</button>
-        <button onclick="seekVideo(-10)">⏪ -10s</button>
-        <button onclick="seekVideo(10)">⏩ +10s</button>
-        <button onclick="skipVideo(1)">⏭️ Skip Vor</button>
+    <!-- Video Sektion -->
+    <div class="player-box">
+        <h3>🎬 Video Player (MP4)</h3>
+        <!-- Ein Datei-Auswahlfeld für Videos -->
+        <input type="file" id="videoFilePicker" accept="video/mp4" multiple>
+        <video id="myVideo" controls></video>
+        <button id="toggleVideoAutoplayBtn" onclick="toggleVideoAutoplay()">🔄 Video Autoplay: AN</button>
+        <button onclick="castVideo()">📺 Auf TV spiegeln (Cast/AirPlay)</button>
     </div>
 
-    <button id="toggleVideoAutoplayBtn" onclick="toggleVideoAutoplay()">🔄 Video Autoplay: AN</button>
-    <button onclick="castVideo()">📺 Auf TV spiegeln (Cast/AirPlay)</button>
-</div>
+    <!-- HLS Stream & Playlist Sektion (Neu hinzugefügt) -->
+    <div class="player-box">
+        <h3>📡 HLS Stream & Playlist (.m3u8)</h3>
+        <input type="text" id="hlsUrlInput" placeholder="https://.../stream.m3u8" style="width: 70%; padding: 8px; margin-bottom: 10px; font-family: monospace;">
+        <button id="playHlsUrlBtn">Stream abspielen</button>
+        <br>
+        <label for="hlsFilePicker" style="cursor: pointer; background: #00ffcc; color: #171212; padding: 8px 12px; border-radius: 24px; font-weight: bold; display: inline-block; margin-top: 5px;">M3U8-Datei laden</label>
+        <input type="file" id="hlsFilePicker" accept=".m3u8,.txt" style="display:none;">
+        <span id="hlsFileName" style="margin-left: 10px; font-family: monospace; color: #fff;"></span>
+        <br><br>
+        <video id="hlsVideo" controls style="width: 100%; margin-top: 10px;"></video>
+    </div>
 
-<!-- MP3 Sektion mit Equalizer -->
+    <!-- MP3 Sektion mit Equalizer -->
     <div class="player-box">
         <h3>🎵 MP3 Player & Equalizer</h3>
         <input type="file" id="audioFilePicker" accept="audio/mp3" multiple>
         
         <!-- GENAU EIN EINZIGER AUDIO-PLAYER -->
         <audio id="myAudio" controls preload="auto"></audio>
-        
-        <!-- Vor-/Zurückspulen & Skip Buttons für Audio -->
-        <div style="margin: 10px 0;">
-            <button onclick="skipAudio(-1)">⏮️ Skip Zurück</button>
-            <button onclick="seekAudio(-10)">⏪ -10s</button>
-            <button onclick="seekAudio(10)">⏩ +10s</button>
-            <button onclick="skipAudio(1)">⏭️ Skip Vor</button>
-        </div>
-
         <button id="toggleAudioAutoplayBtn" onclick="toggleAudioAutoplay()">🔄 Audio Autoplay: AN</button>
-        
-        <ul id="audioPlaylistUI"></ul>
 
-        <div>
-            <label>Bass (Low): <input type="range" id="bassRange" min="-20" max="20" value="0"></label><br>
-            <label>Mitten (Mid): <input type="range" id="midRange" min="-20" max="20" value="0"></label><br>
-            <label>Höhen (High): <input type="range" id="highRange" min="-20" max="20" value="0"></label>
+        <ul id="audioPlayListUI"></ul>
+
+        <div class="equalizer-box">
+            <label>Bass (Low): <input type="range" id="bassRange" min="-20" max="20" value="0" step="1"></label>
+            <label>Mitten (Mid): <input type="range" id="midRange" min="-20" max="20" value="0" step="1"></label>
+            <label>Höhen (High): <input type="range" id="highRange" min="-20" max="20" value="0" step="1"></label>
         </div>
     </div>
 
-          <!-- Playlist Speicher Sektion -->
-            <div class="player-box">
-            <h3>💾 Playlist Manager (Local Storage)</h3>
-            <input type="text" id="trackinput" placeholder="Hier Name der Playlist eintragen...">
-            <button onclick="savePlaylist()">Zur Playlist hinzufügen</button>
-            <ul id="playlistContainer"></ul>
-            </div>
-
-                <div class="player-box" style="text-align: center;">
-    <button onclick="openImpressumModal()">📜 Zum Impressum & Danksagung</button>
-</div>
-
-    <!-- Sauber überlagertes Impressum ohne iframe-Schachtelung -->
-    <div id="impressumModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; overflow-y:auto; padding:20px; box-sizing:border-box;">
-        <div class="player-box" style="max-width:800px; margin: 30px auto; position:relative;">
-            <button onclick="closeImpressumModal()" style="position:absolute; top:15px; right:15px;">❌ Schließen</button>
-
-            <h2>📜 Impressum & Danksagung</h2>
-
-            <p><strong>Projekt-Name:</strong> cr.dev.monkey's Chimpanzee-Player</p>
-            <p><strong>Entwickelt von:</strong> cr.dev.monkey unter Verwendung von Parrot OS (Betriebssystem-Offensiv security) & VS Codium (Visual studio Code Nativer fester bestandteil in Parrot OS)</p>
-
-            <hr>
-            <h3>🙏 Danksagung & Helfer</h3>
-            <p>Ein 1000'faches Dankeschön geht an alle die dieses Projekt möglich gemacht und mich bei der Entwicklung unterstützt haben:</p>
-
-            <ul>
-                <li><strong>An mich selbst "REISTEL CHRISTIAN" (cr.dev.monkey)</strong> Für die experimentell selbst geschossenen und erstellten iPhone-Kamerabilder (assets/backgrounds),allen Sprayer'n aus Hamburg St.Pauli-Hamburg Sternschanze-Hamburg-Altona sowie aus dem ImmeZentrum in Hannover dank euch habe ich unendlich viele Pic's für meine Projekte und Arbeiten schießen können die sich echt sehen lassen können. Dank euch bin ich diesbezüglich mehr oder weniger unabhängig und nicht auf Grafiken von Drittanbietern angewiesen und dem geduldigen und unermüdlichen Ehrgeiz meiner wenigkeit und Christian Radtke (Radtke-Ideenentwicklung) beim Coden! Und dem "CCC & CCCHH" Chaos Computer Club Berlin und Hamburg für alles was ich noch bei von und mit euch lernen kann(Wir sehen uns die Tage bei öffentlichen treffen, freue mich bereits darauf. Ihr werdet mir einsehr guter begleiter während meiner IT-Ausbildungszeit zum Fachinformatiker... sein).</li>
-                <li><strong>Gemini:</strong> Mein Persönlich bester digitaler Lerncomputer und KI-Kollaborateur den ich je hatte!!!("Gemini ist seit es ihn gibt meine Unterstützung zum Lernen während meiner Ausbildung zum Fachinformatiker in der Systemintegration. Der für mich derzeit beste weg um mit viel Praxis zu lernen und auch Theorie durch angewendete Praxis!!! THX ChatGPT ist ein Huansohn!!!") Danke auch vorallem für das Heraussuchen von Code-Snippets und des mühsamen Suchens nach Bibliotheken/Librarys!, und für alles dass ich durch dich Lernen konnte sprich was du mir bis jetzt in kürzester Zeit vermitteln konntest an Wissen!!!</li>
-                <li><strong>Verwendete Technologien:</strong> HTML5, CSS3, JavaScript (Web Audio API, LocalStorage, File API), Capacitor (für den APK-Build), sowie GitHub.com und GitLab.com (Githubs MacServer beispielsweise für die erstellung der IPA's für's iPhone, ihren Repositorys, ihren GitHub Pages etc.) für ihre im vollen Umfang zur Entwicklung von Software, Apps und vieles mehr. sowie Linux Parrot OS & Kali Linux als sicherste Entwicklungsumgebung die ich bis jetzt kennengelernt</li>
-            </ul>
-        </div>
-    </div>
-
-           <script src="app.js"></script>
-    </body>
+    <script src="app.js"></script>
+</body>
 </html>
