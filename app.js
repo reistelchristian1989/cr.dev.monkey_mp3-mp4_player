@@ -11,22 +11,24 @@ let isVideoAutoplay = true;
 function toggleAudioAutoplay() {
     isAudioAutoplay = !isAudioAutoplay;
     const btn = document.getElementById('toggleAudioAutoplayBtn');
-    btn.innerText = `🔄 Audio Autoplay: ${isAudioAutoplay ? 'AN' : 'AUS'}`;
+    if (btn) btn.innerText = `🔄 Audio Autoplay: ${isAudioAutoplay ? 'AN' : 'AUS'}`;
 }
 
 function toggleVideoAutoplay() {
     isVideoAutoplay = !isVideoAutoplay;
     const btn = document.getElementById('toggleVideoAutoplayBtn');
-    btn.innerText = `🔄 Video Autoplay: ${isVideoAutoplay ? 'AN' : 'AUS'}`;
+    if (btn) btn.innerText = `🔄 Video Autoplay: ${isVideoAutoplay ? 'AN' : 'AUS'}`;
 }
 
 // Impressum Modal ohne Musik-Stopp
 function openImpressumModal() {
-    document.getElementById('impressumModal').style.display = 'block';
+    const modal = document.getElementById('impressumModal');
+    if (modal) modal.style.display = 'block';
 }
 
 function closeImpressumModal() {
-    document.getElementById('impressumModal').style.display = 'none';
+    const modal = document.getElementById('impressumModal');
+    if (modal) modal.style.display = 'none';
 }
 
 audioElement.addEventListener('play', () => {
@@ -60,15 +62,25 @@ audioElement.addEventListener('play', () => {
 });
 
 // Regler-Steuerung Verknüpfung
-document.getElementById('bassRange').addEventListener('input', (e) => {
-    if(bassFilter) bassFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
-});
-document.getElementById('midRange').addEventListener('input', (e) => {
-    if (midFilter) midFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
-});
-document.getElementById('highRange').addEventListener('input', (e) => {
-    if (highFilter) highFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
-});
+const bassRange = document.getElementById('bassRange');
+const midRange = document.getElementById('midRange');
+const highRange = document.getElementById('highRange');
+
+if (bassRange) {
+    bassRange.addEventListener('input', (e) => {
+        if(bassFilter) bassFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
+    });
+}
+if (midRange) {
+    midRange.addEventListener('input', (e) => {
+        if (midFilter) midFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
+    });
+}
+if (highRange) {
+    highRange.addEventListener('input', (e) => {
+        if (highFilter) highFilter.gain.setValueAtTime(e.target.value, audioCtx.currentTime);
+    });
+}
 
 // --- SPUL- UND SKIP-FUNKTIONEN FÜR AUDIO ---
 function seekAudio(seconds) {
@@ -102,6 +114,7 @@ function skipVideo(direction) {
 // --- PLAYLIST SPEICHER-FUNKTION (LOCAL STORAGE) ---
 function savePlaylist() {
     const input = document.getElementById('trackinput');
+    if (!input) return;
     const playlistName = input.value.trim();
     if(!playlistName) return;
 
@@ -139,6 +152,7 @@ function deletePlaylist(index) {
 
 function loadPlaylistManager() {
     const listContainer = document.getElementById('playlistContainer');
+    if (!listContainer) return;
     listContainer.innerHTML = '';
     let savedPlaylists = JSON.parse(localStorage.getItem('myPlaylists')) || [];
 
@@ -193,7 +207,7 @@ function castVideo() {
         alert("Suche nach verfügbaren Fernsehern (Chromecast / AirPlay via API)...");
     } else {
         alert("Starte native Medienübertragung auf verbundene Bildschirme.");
-        if(videoElement.requestFullscreen) {
+        if(videoElement && videoElement.requestFullscreen) {
             videoElement.requestFullscreen();
         }
     }
@@ -206,19 +220,21 @@ const videoPlaylistUI = document.getElementById('videoPlaylistUI');
 let loadedVideos = [];
 let currentVideoIndex = 0;
 
-videoPicker.addEventListener('change', (event) => {
-    const files = event.target.files;
-    loadedVideos = Array.from(files);
-    currentVideoIndex = 0;
+if (videoPicker) {
+    videoPicker.addEventListener('change', (event) => {
+        const files = event.target.files;
+        loadedVideos = Array.from(files);
+        currentVideoIndex = 0;
 
-    renderVideoPlaylist();
-    if (loadedVideos.length > 0) {
-        playVideoTrack(currentVideoIndex);
-    }
-});
+        renderVideoPlaylist();
+        if (loadedVideos.length > 0) {
+            playVideoTrack(currentVideoIndex);
+        }
+    });
+}
 
 function playVideoTrack(index) {
-    if (index >= 0 && index < loadedVideos.length) {
+    if (index >= 0 && index < loadedVideos.length && videoElement) {
         currentVideoIndex = index;
         videoElement.src = URL.createObjectURL(loadedVideos[index]);
         videoElement.load();
@@ -251,11 +267,13 @@ function renderVideoPlaylist() {
     });
 }
 
-videoElement.addEventListener('ended', () => {
-    if (isVideoAutoplay && currentVideoIndex + 1 < loadedVideos.length) {
-        playVideoTrack(currentVideoIndex + 1);
-    }
-});
+if (videoElement) {
+    videoElement.addEventListener('ended', () => {
+        if (isVideoAutoplay && currentVideoIndex + 1 < loadedVideos.length) {
+            playVideoTrack(currentVideoIndex + 1);
+        }
+    });
+}
 
 // --- MEHRERE MP3s AUS DEM SPEICHER LADEN & PLAYLIST ERSTELLEN ---
 const audioPicker = document.getElementById('audioFilePicker');
@@ -263,15 +281,17 @@ const audioPlaylistUI = document.getElementById('audioPlaylistUI');
 let loadedTracks = []; 
 let currentAudioIndex = 0;
 
-audioPicker.addEventListener('change', (event) => {
-    const files = event.target.files; 
-    
-    for (let i = 0; i < files.length; i++) {
-        loadedTracks.push(files[i]);
-    }
-    
-    renderAudioPlaylist();
-});
+if (audioPicker) {
+    audioPicker.addEventListener('change', (event) => {
+        const files = event.target.files; 
+        
+        for (let i = 0; i < files.length; i++) {
+            loadedTracks.push(files[i]);
+        }
+        
+        renderAudioPlaylist();
+    });
+}
 
 function playAudioTrack(index) {
     if (index >= 0 && index < loadedTracks.length) {
@@ -284,6 +304,7 @@ function playAudioTrack(index) {
 }
 
 function renderAudioPlaylist() {
+    if (!audioPlaylistUI) return;
     audioPlaylistUI.innerHTML = ''; 
     
     loadedTracks.forEach((track, index) => {
@@ -311,3 +332,71 @@ audioElement.addEventListener('ended', () => {
         playAudioTrack(currentAudioIndex + 1);
     }
 });
+
+
+// ==========================================
+// --- NEU: HLS STREAM & PLAYLIST LOGIK ---
+// ==========================================
+const hlsUrlInput = document.getElementById('hlsUrlInput');
+const playHlsUrlBtn = document.getElementById('playHlsUrlBtn');
+const hlsFilePicker = document.getElementById('hlsFilePicker');
+const hlsFileName = document.getElementById('hlsFileName');
+const hlsVideo = document.getElementById('hlsVideo');
+
+function playHlsStream(url) {
+    if (!hlsVideo) return;
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(hlsVideo);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            hlsVideo.play();
+        });
+    } else if (hlsVideo.canPlayType('application/vnd.apple.mpegurl')) {
+        hlsVideo.src = url;
+        hlsVideo.addEventListener('loadedmetadata', function() {
+            hlsVideo.play();
+        });
+    } else {
+        alert('HLS wird von diesem Browser nicht unterstützt.');
+    }
+}
+
+if (playHlsUrlBtn) {
+    playHlsUrlBtn.addEventListener('click', () => {
+        const url = hlsUrlInput ? hlsUrlInput.value.trim() : '';
+        if (url) {
+            playHlsStream(url);
+        } else {
+            alert('Bitte gib einen gültigen HLS-Link ein.');
+        }
+    });
+}
+
+if (hlsFilePicker) {
+    hlsFilePicker.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            if (hlsFileName) hlsFileName.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n');
+                let streamUrl = '';
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line && !line.startsWith('#')) {
+                        streamUrl = line;
+                        break;
+                    }
+                }
+                if (streamUrl) {
+                    playHlsStream(streamUrl);
+                } else {
+                    alert('Keine gültige Stream-URL in der ausgewählten .m3u8-Datei gefunden.');
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+}
